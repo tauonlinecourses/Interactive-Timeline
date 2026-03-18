@@ -344,7 +344,7 @@
            115px = bottom-bar bottom(12) + height(~90) + 13px gap */
         --tl-height: calc(100vh - 158px - 115px);
         --tl-events-line-gap: 20px;
-        --tl-line-bottom-gap: 25px;
+        --tl-line-bottom-gap: 40px;
     }
 
     .timeline-container {
@@ -421,7 +421,7 @@
         /* Single-row menu bottom = 153px. 5px gap → 158px top clearance. 115px = above bottom bar */
         --tl-height: calc(100vh - 158px - 115px);
         --tl-events-line-gap: 25px;
-        --tl-line-bottom-gap: 15px;
+        --tl-line-bottom-gap: 40px;
     }
     .timeline-container {
         margin-top: 158px;
@@ -436,7 +436,7 @@
            115px = above bottom bar */
         --tl-height: calc(100vh - 128px - 115px);
         --tl-events-line-gap: 15px;
-        --tl-line-bottom-gap: 15px;
+        --tl-line-bottom-gap: 40px;
     }
     .timeline-container {
         margin-top: 128px;
