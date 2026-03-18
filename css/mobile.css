@@ -52,10 +52,10 @@
         padding: 4px 6px;
         gap: 4px;
         max-width: 100%;
-        /* Ensure horizontal layout */
+        /* Ensure single-row horizontal layout */
         flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
         /* Allow horizontal scrolling if needed */
         overflow-x: auto;
         overflow-y: visible;
@@ -334,13 +334,25 @@
 
 /* ==================== TABLET STYLES (768px - 1024px) ==================== */
 @media (min-width: 768px) and (max-width: 1024px) {
-    .timeline-container {
-        height: 700px;
+    body {
+        justify-content: flex-start; /* anchor from top so container stays below categories menu */
     }
 
-    .events-layer {
-        height: 600px;
+    :root {
+        /* Single-row menu (nowrap) guarantees height = padding(10) + btn(33) + padding(10) = 53px
+           Bottom edge = 100 + 53 = 153px. 5px gap → 158px top clearance.
+           115px = bottom-bar bottom(12) + height(~90) + 13px gap */
+        --tl-height: calc(100vh - 158px - 115px);
+        --tl-events-line-gap: 20px;
+        --tl-line-bottom-gap: 25px;
     }
+
+    .timeline-container {
+        margin-top: 158px;
+        height: var(--tl-height);
+    }
+
+    /* NOTE: .events-layer height override removed — CSS variable --tl-events-height now drives it */
 
     .timeline-bottom-bar {
         width: 80vw;
@@ -402,29 +414,33 @@
 
 /* Large laptops / short desktops: e.g. 1366×768, 1440×900 */
 @media (min-width: 1025px) and (max-height: 900px) {
+    body {
+        justify-content: flex-start; /* anchor from top so container stays below categories menu */
+    }
     :root {
-        --tl-height: max(600px, calc(100vh - var(--tl-margin-top) - var(--tl-bottom-reserved)));
+        /* Single-row menu bottom = 153px. 5px gap → 158px top clearance. 115px = above bottom bar */
+        --tl-height: calc(100vh - 158px - 115px);
         --tl-events-line-gap: 25px;
         --tl-line-bottom-gap: 15px;
     }
-    /* Push timeline down so the line aligns near the minimap.
-       margin-top: 98px is derived so that with justify-content:center on body
-       and a flexible container height of (100vh - 150px), the line always
-       lands at ~y=124 + (containerH - lineBottomGap - pushUpOffset) ≈ minimap top.
-       Body layout is untouched — regular tall-monitor PC is unaffected. */
     .timeline-container {
-        margin-top: 98px;
+        margin-top: 158px;
     }
 }
 
 /* Very short laptop screens: e.g. 1280×720, 1366×768 at 125% DPI */
 @media (min-width: 1025px) and (max-height: 750px) {
+    /* body flex-start already set by the max-height:900px rule above */
     :root {
-        --tl-height: max(520px, calc(100vh - var(--tl-margin-top) - var(--tl-bottom-reserved)));
+        /* Single-row menu bottom = 75+10+28+10 = 123px. 5px gap → 128px top clearance.
+           115px = above bottom bar */
+        --tl-height: calc(100vh - 128px - 115px);
         --tl-events-line-gap: 15px;
         --tl-line-bottom-gap: 15px;
     }
-    /* Reclaim ~25px of vertical space by moving categories up slightly */
+    .timeline-container {
+        margin-top: 128px;
+    }
     .categories-menu {
         top: 75px;
     }

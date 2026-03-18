@@ -232,11 +232,23 @@ function renderEvents() {
         }
     });
 
-    const maxLayers = 8; // Maximum lanes to prevent infinite growth
     const isMobile = window.innerWidth < 768;
-    const layerSpacing = isMobile ? 55 : 65;
+    const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1024;
+    const isShortScreen = window.innerHeight < 900 && !isMobile;
+    // Use tighter lane spacing on small/short screens so all lanes fit in the available height
+    const layerSpacing = (isMobile || isTablet || isShortScreen) ? 55 : 65;
     const eventsLayerHeight = (eventsLayer?.clientHeight || eventsLayer?.offsetHeight || 800);
     const eventHeight = 30;
+    // Dynamically cap maxLayers to the number of lanes that physically fit.
+    // On tablets/short screens pushUpOffset is disabled (see below), so no space reservation needed.
+    const expectedPushUp = (isTablet || isShortScreen) ? 0 : Math.min(layerSpacing, 160);
+    // On small/short screens the categories menu is guaranteed single-row, so the events layer
+    // already has its full computed height. Use a smaller bottom reserve (5px vs 30px) to allow
+    // one extra lane that would otherwise be discarded by the conservative eventHeight margin.
+    const fittingReserve = (isTablet || isShortScreen) ? 5 : eventHeight;
+    const availableForLayers = eventsLayerHeight - fittingReserve - expectedPushUp;
+    const fittingLayers = Math.max(3, Math.floor(availableForLayers / layerSpacing) + 1);
+    const maxLayers = Math.min(8, fittingLayers);
     const laneOccupancy = []; // Dynamic array - lanes added as needed
     // Track events by lane with their event index for title visibility checks
     const laneEventsByIndex = []; // Array of arrays, each containing event indices in that lane
@@ -311,7 +323,7 @@ function renderEvents() {
                 showReflectionBlock(event.start_year, event.end_year, eventColor, reflectionLeft, reflectionWidth);
                 const followCursor = eventDurationYears >= 15;
                 const laneIndex = parseInt(eventDiv.getAttribute('data-lane-index') || '0', 10);
-                const placement = laneIndex >= 7 ? 'below' : 'above';
+                const placement = laneIndex >= maxLayers - 2 ? 'below' : 'above';
                 showEventTooltip(event, eventDiv, followCursor, e, placement);
                 highlightMinimapEvent(eventDiv);
             });
@@ -727,7 +739,9 @@ function renderEvents() {
     if (fixedPushUpOffset === null) {
         fixedPushUpOffset = baselinePushUpOffset;
     }
-    const pushUpOffset = fixedPushUpOffset;
+    // On tablets/short screens disable push-up so all lanes stay within the bounded container
+    // and don't drift toward the fixed categories menu at the top.
+    const pushUpOffset = (isTablet || isShortScreen) ? 0 : fixedPushUpOffset;
 
     const allEventElements = eventsLayer.querySelectorAll('.event:not(.fade-out)');
     allEventElements.forEach(eventDiv => {
