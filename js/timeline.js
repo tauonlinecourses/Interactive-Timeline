@@ -123,6 +123,23 @@ function renderTimeline(scrollToEnd = false, centerYear = null) {
     renderYearLabels();
     renderEvents();
 
+    // After event spreading, some top-layer events may have been pushed beyond effectiveWidth.
+    // Extend all timeline layers to cover the rightmost event edge.
+    const allEventEls = eventsLayer.querySelectorAll('.event:not(.fade-out)');
+    let maxEventRight = effectiveWidth;
+    allEventEls.forEach(el => {
+        const left = parseFloat(el.style.left) || 0;
+        const width = parseFloat(el.style.width) || 0;
+        maxEventRight = Math.max(maxEventRight, left + width);
+    });
+    if (maxEventRight > effectiveWidth) {
+        eventsLayer.style.width = `${maxEventRight}px`;
+        yearsLayer.style.width = `${maxEventRight}px`;
+        reflectionLayer.style.width = `${maxEventRight}px`;
+        const timelineLineEl = scrollable.querySelector('.timeline-line');
+        if (timelineLineEl) timelineLineEl.style.width = `${maxEventRight}px`;
+    }
+
     setTimeout(() => {
         if (scrollToEnd) {
             // RTL: newest events are at left (scrollLeft = 0) — no scrolling needed.
