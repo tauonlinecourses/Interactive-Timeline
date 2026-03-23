@@ -1,6 +1,8 @@
 // Data loading: fetch events JSON and bootstrap timeline.
 
 let infoData = null;
+let fitZoomResizeTimeout = null;
+let fitZoomResizeHandlerInstalled = false;
 
 async function loadInfo() {
     try {
@@ -85,15 +87,60 @@ async function loadEvents() {
             const yearRange = maxYear - minYear + 1;
             if (yearRange > 0 && viewportWidth > 0) {
                 const idealYearWidth = viewportWidth / yearRange;
-                // Clamp between the absolute zoom limits
-                yearWidth = Math.min(Math.max(idealYearWidth, maxZoomOut), maxZoomIn);
-                // Set this as the max zoom-out so users can't zoom beyond the event range
+                // Make "max zoom out" a true fit-to-viewport value.
+                // We intentionally allow going below the initial hardcoded zoom floor
+                // so smaller screens don't end up with horizontal scrolling.
+                //
+                // A small safety factor helps prevent rare 1px overflow due to rounding
+                // and the top-layer overlap spreading.
+                const fitSafetyFactor = 0.995;
+                yearWidth = Math.min(idealYearWidth * fitSafetyFactor, maxZoomIn);
+                // Set this as the max zoom-out (minimum yearWidth) for this timeline.
                 maxZoomOut = yearWidth;
                 setZoomButtonStates();
             }
         }
 
         renderTimeline(true);
+
+        // Keep fit-to-viewport zoom correct when resizing (e.g. laptop window / DPI changes).
+        if (!fitZoomResizeHandlerInstalled) {
+            fitZoomResizeHandlerInstalled = true;
+            window.addEventListener('resize', () => {
+                if (fitZoomResizeTimeout) clearTimeout(fitZoomResizeTimeout);
+                fitZoomResizeTimeout = setTimeout(() => {
+                    const scrollable = getTimelineScrollable();
+                    if (!scrollable || minYear === null || maxYear === null) return;
+
+                    const viewportWidth = scrollable.clientWidth;
+                    const yearRange = maxYear - minYear + 1;
+                    if (!(yearRange > 0 && viewportWidth > 0)) return;
+
+                    const previousMaxZoomOut = maxZoomOut;
+                    const previousYearWidth = yearWidth;
+
+                    const idealYearWidth = viewportWidth / yearRange;
+                    const fitSafetyFactor = 0.995;
+                    const newMaxZoomOut = Math.min(idealYearWidth * fitSafetyFactor, maxZoomIn);
+
+                    if (!Number.isFinite(newMaxZoomOut) || newMaxZoomOut <= 0) return;
+
+                    maxZoomOut = newMaxZoomOut;
+
+                    const EPS = 0.0001;
+                    const wasAtMinZoomOut = previousYearWidth <= previousMaxZoomOut + EPS;
+                    const isBelowNewMin = previousYearWidth < newMaxZoomOut - EPS;
+
+                    // If the user was already at max zoom out, keep it fitting after resize.
+                    // If the new "min zoom out" is higher, clamp back into the valid range.
+                    if (wasAtMinZoomOut || isBelowNewMin) {
+                        updateZoom(newMaxZoomOut, { anchor: { type: 'center' } });
+                    } else {
+                        setZoomButtonStates();
+                    }
+                }, 150);
+            });
+        }
 
         if (typeof eventIndex === 'number' && eventIndex >= 0 && eventIndex < events.length) {
             showEventModal(events[eventIndex], { skipHistoryUpdate: true });

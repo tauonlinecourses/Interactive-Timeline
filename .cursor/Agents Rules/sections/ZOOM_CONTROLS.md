@@ -19,10 +19,13 @@ Zoom is measured as `yearWidth` — **pixels per year**. There are 8 discrete pr
 
 ```js
 // Defined in zoom.js
-const ZOOM_LEVELS = [3.57, 7, 14, 28, 50, 100, 150, 200];
+const zoomLevels = [3.57, 8, 15, 30, 50, 100, 150, 200];
 ```
 
-The initial zoom level is calculated by `data-loader.js` after events load, to fit the full date range in the viewport.
+`maxZoomOut` (the minimum allowed `yearWidth`) is calculated by `data-loader.js` after events load, to fit the full date range in the viewport.
+On smaller screens this value may go below the initial hardcoded zoom floor so that `max zoom out` does not produce horizontal scrolling.
+
+On `window.resize`, the fit-to-viewport `maxZoomOut` value is recomputed (debounced). If the user is currently at max zoom out, the timeline is re-zoomed to keep it fitting after the resize.
 
 ## How Zoom Works
 
@@ -62,4 +65,5 @@ Besides button clicks, zoom can be triggered by:
 | `js/config.js` | `yearWidth` global state |
 | `js/timeline.js` | `renderTimeline()` — called after every zoom change |
 | `js/minimap.js` | `refreshMinimap()` — called after every zoom change |
+| `js/data-loader.js` | Computes dynamic fit-to-viewport `maxZoomOut` and updates it on resize |
 | `js/app.js` | Wires click listeners for `#zoomIn` / `#zoomOut` |

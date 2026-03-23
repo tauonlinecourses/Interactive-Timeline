@@ -60,6 +60,8 @@ const width = totalYears * yearWidth; // yearWidth = current zoom level (px/year
 timelineScrollable.style.width = width + 'px';
 ```
 
+When events must be repositioned on the top layer to avoid overlaps, the spreading logic is clamped to stay within `timelineWidth`. This prevents “fit-to-screen” max zoom-out from being broken by overlap spreading and causing horizontal overflow.
+
 ## Drag-to-Pan
 
 Users can click and drag horizontally inside `.timeline-scrollable`. This is set up by `setupTimelineDrag()` in `timeline.js`:

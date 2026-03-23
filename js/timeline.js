@@ -498,6 +498,7 @@ function renderEvents() {
         // Use larger gap on mobile for better touch interaction
         const isMobileForTopLayer = window.innerWidth < 768;
         const topLayerMinGapPx = isMobileForTopLayer ? 75 : 50;
+        const timelineWidth = getTimelineWidth();
         
         // Collect all top layer events with their info
         const topLayerEvents = laneEventsByIndex[topLayerIndex].map(eventIndex => {
@@ -525,9 +526,10 @@ function renderEvents() {
                 } else {
                     if (naturalLeftPx < rightmostAllowedLeft) {
                         // Shift this event rightward to clear the previous one
-                        const newLeftPx = rightmostAllowedLeft;
-                        eventDiv.style.left = `${newLeftPx}px`;
-                        rightmostAllowedLeft = newLeftPx + eventWidthPx + topLayerMinGapPx;
+                        const maxLeftPx = Math.max(0, timelineWidth - eventWidthPx);
+                        const clampedLeftPx = Math.max(0, Math.min(rightmostAllowedLeft, maxLeftPx));
+                        eventDiv.style.left = `${clampedLeftPx}px`;
+                        rightmostAllowedLeft = clampedLeftPx + eventWidthPx + topLayerMinGapPx;
                     } else {
                         rightmostAllowedLeft = naturalLeftPx + eventWidthPx + topLayerMinGapPx;
                     }
@@ -547,9 +549,11 @@ function renderEvents() {
                 } else {
                     const naturalRightPx = naturalLeftPx + eventWidthPx;
                     if (naturalRightPx > leftmostAllowedRight) {
-                        const newLeftPx = Math.max(0, leftmostAllowedRight - eventWidthPx);
-                        eventDiv.style.left = `${newLeftPx}px`;
-                        leftmostAllowedRight = newLeftPx - topLayerMinGapPx;
+                        const maxLeftPx = Math.max(0, timelineWidth - eventWidthPx);
+                        const unclampedLeftPx = Math.max(0, leftmostAllowedRight - eventWidthPx);
+                        const clampedLeftPx = Math.min(unclampedLeftPx, maxLeftPx);
+                        eventDiv.style.left = `${clampedLeftPx}px`;
+                        leftmostAllowedRight = clampedLeftPx - topLayerMinGapPx;
                     } else {
                         leftmostAllowedRight = naturalLeftPx - topLayerMinGapPx;
                     }
