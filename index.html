@@ -23,8 +23,9 @@
 
     <!-- Info Header: Timeline title image + Info Button -->
     <div class="info-header">
-        <button class="info-button" id="infoBtn" aria-label="מידע על הפרויקט">
-            <span>i</span>
+        <button class="info-button" id="infoBtn" type="button" aria-label="מידע על הפרויקט" aria-describedby="infoBtnTooltip">
+            <span class="info-button__tooltip" id="infoBtnTooltip" role="tooltip">לחצו כאן להנחיות שימוש בציר הזמן ולהסבר מדוע הוא מתחיל בשנת 1492</span>
+            <span aria-hidden="true">i</span>
         </button>
         <img id="timelineTitleImage" class="timeline-title-image" src="" alt="">
         

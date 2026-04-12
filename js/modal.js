@@ -25,13 +25,53 @@ function closeInfoModal() {
     document.body.style.overflow = '';
 }
 
+const INFO_TOOLTIP_DELAY_MS = 3000;
+const INFO_TOOLTIP_INTRO_MS = 10000;
+
 function initInfoModal() {
     const infoBtn = document.getElementById('infoBtn');
     const infoModalCloseBtn = document.getElementById('infoModalCloseBtn');
     const infoModal = document.getElementById('infoModal');
-    
+
+    let infoTooltipDelayTimer = null;
+    let infoTooltipIntroTimer = null;
+
+    function clearInfoTooltipDelayTimer() {
+        if (infoTooltipDelayTimer !== null) {
+            clearTimeout(infoTooltipDelayTimer);
+            infoTooltipDelayTimer = null;
+        }
+    }
+
+    function clearInfoTooltipIntroTimer() {
+        if (infoTooltipIntroTimer !== null) {
+            clearTimeout(infoTooltipIntroTimer);
+            infoTooltipIntroTimer = null;
+        }
+    }
+
+    function hideInfoTooltipIntro() {
+        clearInfoTooltipDelayTimer();
+        clearInfoTooltipIntroTimer();
+        if (infoBtn) {
+            infoBtn.classList.remove('info-button--tooltip-visible');
+        }
+    }
+
+    function showInfoTooltipIntro() {
+        if (!infoBtn) return;
+        infoBtn.classList.add('info-button--tooltip-visible');
+        clearInfoTooltipIntroTimer();
+        infoTooltipIntroTimer = setTimeout(hideInfoTooltipIntro, INFO_TOOLTIP_INTRO_MS);
+    }
+
     if (infoBtn) {
-        infoBtn.addEventListener('click', showInfoModal);
+        infoTooltipDelayTimer = setTimeout(showInfoTooltipIntro, INFO_TOOLTIP_DELAY_MS);
+
+        infoBtn.addEventListener('click', () => {
+            hideInfoTooltipIntro();
+            showInfoModal();
+        });
     }
     
     if (infoModalCloseBtn) {
