@@ -32,6 +32,19 @@ function initInfoModal() {
     const infoBtn = document.getElementById('infoBtn');
     const infoModalCloseBtn = document.getElementById('infoModalCloseBtn');
     const infoModal = document.getElementById('infoModal');
+    const infoBtnTooltip = document.getElementById('infoBtnTooltip');
+
+    const params = new URLSearchParams(window.location.search);
+    const isIsraelTimeline = (params.get('t') || '').toLowerCase() === 'israel';
+
+    // Israel timeline: remove the info button tooltip entirely on this page only.
+    if (isIsraelTimeline) {
+        if (infoBtnTooltip) infoBtnTooltip.remove();
+        if (infoBtn) {
+            infoBtn.classList.remove('info-button--tooltip-visible');
+            infoBtn.removeAttribute('aria-describedby');
+        }
+    }
 
     let infoTooltipDelayTimer = null;
     let infoTooltipIntroTimer = null;
@@ -66,7 +79,9 @@ function initInfoModal() {
     }
 
     if (infoBtn) {
-        infoTooltipDelayTimer = setTimeout(showInfoTooltipIntro, INFO_TOOLTIP_DELAY_MS);
+        if (!isIsraelTimeline) {
+            infoTooltipDelayTimer = setTimeout(showInfoTooltipIntro, INFO_TOOLTIP_DELAY_MS);
+        }
 
         infoBtn.addEventListener('click', () => {
             hideInfoTooltipIntro();
