@@ -54,6 +54,11 @@
     margin-top: -2px;
 }
 
+/* Timeline-specific tweak: make the Israel timeline tooltip narrower */
+.info-button--israel .info-button__tooltip {
+    width: min(260px, calc(100vw - 28px));
+}
+
 /* Tooltip: below the button, right-aligned with the button so it cannot overflow the viewport on the right */
 .info-button__tooltip {
     position: absolute;
@@ -85,6 +90,33 @@
         opacity 0.35s ease-out,
         transform 0.35s ease-out,
         visibility 0s linear 0.35s;
+}
+
+.info-button__tooltip::before,
+.info-button__tooltip::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+}
+
+/* Arrow border (matches tooltip border) */
+.info-button__tooltip::before {
+    top: -9px;
+    right: 8px;
+    border-left-width: 9px;
+    border-right-width: 9px;
+    border-bottom: 9px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Arrow fill (matches tooltip background) */
+.info-button__tooltip::after {
+    top: -8px;
+    right: 9px;
+    border-bottom: 8px solid #464646;
 }
 
 .info-button:hover .info-button__tooltip,
@@ -133,5 +165,9 @@
         font-size: 12px;
         width: min(310px, calc(100vw - 20px));
         padding: 9px 10px;
+    }
+
+    .info-button--israel .info-button__tooltip {
+        width: min(240px, calc(100vw - 20px));
     }
 }

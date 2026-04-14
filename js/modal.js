@@ -37,13 +37,14 @@ function initInfoModal() {
     const params = new URLSearchParams(window.location.search);
     const isIsraelTimeline = (params.get('t') || '').toLowerCase() === 'israel';
 
-    // Israel timeline: remove the info button tooltip entirely on this page only.
-    if (isIsraelTimeline) {
-        if (infoBtnTooltip) infoBtnTooltip.remove();
-        if (infoBtn) {
-            infoBtn.classList.remove('info-button--tooltip-visible');
-            infoBtn.removeAttribute('aria-describedby');
-        }
+    // Israel timeline: keep the tooltip but use different helper text.
+    if (isIsraelTimeline && infoBtnTooltip) {
+        infoBtnTooltip.textContent = 'לחצו כאן להנחיות שימוש בציר הזמן';
+    }
+
+    // Israel timeline: use narrower tooltip styling.
+    if (infoBtn) {
+        infoBtn.classList.toggle('info-button--israel', isIsraelTimeline);
     }
 
     let infoTooltipDelayTimer = null;
@@ -79,9 +80,7 @@ function initInfoModal() {
     }
 
     if (infoBtn) {
-        if (!isIsraelTimeline) {
-            infoTooltipDelayTimer = setTimeout(showInfoTooltipIntro, INFO_TOOLTIP_DELAY_MS);
-        }
+        infoTooltipDelayTimer = setTimeout(showInfoTooltipIntro, INFO_TOOLTIP_DELAY_MS);
 
         infoBtn.addEventListener('click', () => {
             hideInfoTooltipIntro();
